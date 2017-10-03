@@ -18,5 +18,15 @@ New York World Fair.
 To see what we can learn from reimplementing a historic system
 
 # How to use
+stk requires libasound2 and libasound2-dev in order to configure using automake
+commands:
+sudo apt install automake
+sudo apt-get install libasound2
+sudo apt-get install libasound2-dev
+then 
+./configure 
+while in the stk-4.6.0 directory.
+
+
 
 TBD -- currently under progress
