@@ -9,6 +9,7 @@ in 1937-1938. The Voder was a system capable of creating recognizable speech wit
 human vocal cords entered into the procedure at any point.
 
 ![](https://i1.wp.com/120years.net/wordpress/wp-content/uploads/voder01jpg.jpg)
+
 Voder Diagram
 
 The system consisted of a "buzzer" tube and a "hissing" tube which were two sound generators.
@@ -17,9 +18,11 @@ And a series of keys which could switch between the two sounds and also produce 
 and a knob to make the voice sounds male or female by changing the pitch.
 
 Control system of the Voder
+
 ![](https://i0.wp.com/120years.net/wordpress/wp-content/uploads/voder03.jpg?w=683)
 
 **Video demonstrating the Voder**
+
 [![](https://img.youtube.com/vi/5hyI_dM5cGo/0.jpg)](https://www.youtube.com/watch?v=5hyI_dM5cGo)
 
 Using the Voder required training as it required precise timing and accuracy to
