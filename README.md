@@ -63,5 +63,5 @@ make
 If you have any questions contact us: gurnys@rpi.edu
 
 ## License
-### LICENSING
+
 Voder2017 is licensed under GPL v3.0 which can be viewed in [LICENSE](LICENSE.txt)
