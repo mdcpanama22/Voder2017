@@ -48,17 +48,19 @@ It can be used for text-to-speech without the need of any sound recordings.
 
 # How to use
 
+**Install required packages**
+
+```sudo apt install automake autoconf libasound2 libasound2-dev```
+
 #### Running the Voder
 
-Pull and type make
+git clone
+make
 
 #### Installing STK by itself
 
 [Download Page](https://ccrma.stanford.edu/software/stk/download.html)
 
-**Install required packages**
-
-```sudo apt install automake autoconf libasound2 libasound2-dev```
 
 **Move into STK folder**
 
