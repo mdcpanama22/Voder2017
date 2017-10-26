@@ -19,6 +19,8 @@ namespace gui {
         ~Window();
         
         bool windowShouldClose();
+        void update();
+        void clear();
         
         
         GLFWwindow* getWindowPtr();

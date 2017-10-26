@@ -1,6 +1,7 @@
-#include <iostream>
+#include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "includes/Window.h"
+#include <iostream>
 
 using namespace gui;
 
@@ -14,9 +15,12 @@ int main() {
     
     Window* win = new Window("Title", 640, 480);
     
+    glewInit();
+    
     while (!win->windowShouldClose())
     {
-       
+       win->clear();
+       win->update();
     }
     
     delete win;

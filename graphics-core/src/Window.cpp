@@ -26,6 +26,15 @@ namespace gui {
     bool Window::windowShouldClose() {
         return glfwWindowShouldClose(window);
     }
+    
+    void Window::update() {
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+    
+    void Window::clear() {
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
         
     GLFWwindow* Window::getWindowPtr() {
         return window;

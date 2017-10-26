@@ -11,7 +11,7 @@ CC = g++
 # COMPILER_FLAGS = -w
 #
 #  #LINKER_FLAGS specifies the libraries we're linking against
-LINKER_FLAGS = -lglfw
+LINKER_FLAGS = -lglfw -lGLEW -lGLU -lGL
 
 #OBJ_NAME specifies the name of our exectuable
 OBJ_NAME = bin/gui
