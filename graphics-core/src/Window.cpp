@@ -38,7 +38,7 @@ namespace gui {
         glfwSwapBuffers(window);
         glfwPollEvents();
         
-        std::cout << ((keys[GLFW_KEY_A]) ? "PRESSED!" : "NOT PRESSED!") << std::endl;
+        std::cout << ((keys[GLFW_KEY_A]) ? "A PRESSED! " : "A NOT PRESSED! ") << ((keys[GLFW_KEY_P]) ? "P PRESSED!" : "P NOT PRESSED!") << std::endl;
         
     }
     
