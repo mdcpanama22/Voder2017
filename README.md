@@ -50,7 +50,7 @@ It can be used for text-to-speech without the need of any sound recordings.
 
 **Install required packages**
 
-```sudo apt install automake autoconf libasound2 libasound2-dev```
+```sudo apt install automake autoconf libasound2 libasound2-dev libglfw3 libglfw3-dev libglew2.0 libglew1.13 libglew-dev```
 
 #### Running the Voder
 ```
