@@ -1,7 +1,7 @@
 #include "../includes/Window.h"
 
 namespace gui {
-
+    
     Window::Window(const char* ptitle, const int& pwidth, const int& pheight)
         : winWidth(pwidth), winHeight(pheight) 
     {
@@ -15,6 +15,13 @@ namespace gui {
         }
         
         glfwMakeContextCurrent(window);
+        
+        glfwSetWindowUserPointer(window, this);
+        
+        for (int i = 0; i < MAX_KEYS; ++i) {
+            keys[i] = false;
+        }
+        
         
     }
     
@@ -30,10 +37,21 @@ namespace gui {
     void Window::update() {
         glfwSwapBuffers(window);
         glfwPollEvents();
+        
+        std::cout << ((keys[GLFW_KEY_A]) ? "PRESSED!" : "NOT PRESSED!") << std::endl;
+        
     }
     
     void Window::clear() {
         glClear(GL_COLOR_BUFFER_BIT);
+    }
+    
+    void Window::setKey(int keycode, bool value) {
+        keys[keycode] = value;
+    }
+    
+    bool Window::isKeyPressed(int keycode) {
+        return keys[keycode];
     }
         
     GLFWwindow* Window::getWindowPtr() {

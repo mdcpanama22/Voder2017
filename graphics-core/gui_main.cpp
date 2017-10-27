@@ -5,6 +5,10 @@
 
 using namespace gui;
 
+//callbacks
+void error_callback(int error, const char* description);
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 int main() {
     
     
@@ -17,6 +21,9 @@ int main() {
     
     glewInit();
     
+    glfwSetErrorCallback(error_callback);
+    glfwSetKeyCallback(win->getWindowPtr(), key_callback);
+    
     while (!win->windowShouldClose())
     {
        win->clear();
@@ -26,5 +33,22 @@ int main() {
     delete win;
     
     return 0;
+    
+}
+
+void error_callback(int error, const char* description) {
+    std::cerr << "Error: " << description << std::endl;
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    
+    Window* w = (Window*)glfwGetWindowUserPointer(window);
+    
+    if (action != GLFW_RELEASE)
+        w->setKey(key, true);
+    else 
+        w->setKey(key, false);
     
 }

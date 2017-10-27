@@ -3,6 +3,8 @@
 
 namespace gui {
     
+    #define MAX_KEYS 1024
+    
     class Window {
     private:
 
@@ -10,6 +12,8 @@ namespace gui {
         GLFWwindow* window;
         int winWidth, winHeight;
         int mouseX, mouseY;
+        
+        bool keys[MAX_KEYS];
     
     
     public:
@@ -28,6 +32,9 @@ namespace gui {
         const int& getMouseY();
         const int& getWindowWidth();
         const int& getwindowHeight();
+        void setKey(int keycode, bool value);
+        bool isKeyPressed(int keycode);
+        
     
     
     private:
