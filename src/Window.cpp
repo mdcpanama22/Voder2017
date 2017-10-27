@@ -1,4 +1,4 @@
-#include "../includes/Window.h"
+#include "include/Window.h"
 
 namespace gui {
     
@@ -37,10 +37,7 @@ namespace gui {
     void Window::update() {
         glfwSwapBuffers(window);
         glfwPollEvents();
-        
-        std::cout << ((keys[GLFW_KEY_A]) ? "A PRESSED! " : "A NOT PRESSED! ") << ((keys[GLFW_KEY_P]) ? "P PRESSED!" : "P NOT PRESSED!") << std::endl;
-        
-    }
+		}
     
     void Window::clear() {
         glClear(GL_COLOR_BUFFER_BIT);
