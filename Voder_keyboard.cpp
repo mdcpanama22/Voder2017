@@ -29,18 +29,28 @@ int tick( void * outBuff, void * inBuff, unsigned int nBuffFrames,
   SoundGens * sg = (SoundGens *) dataPtr;
 
   register StkFloat * samples = (StkFloat *) outBuff;
+  StkFloat val;
   
   for ( unsigned int i=0; i < nBuffFrames; ++i ) {
     if ( sg->mode == 0 ) { // silent
       *samples++ = 0;
+      *samples++ = 0;
     } else if ( sg->mode == 1 ) { // hiss
-      *samples++ = sg->hiss->tick(); 
+      val = sg->hiss->tick();
+      *samples++ =  val;
+      *samples++ = val;
     } else if ( sg->mode == 2 ) { // buzz
-      *samples++ = sg->buzz->tick(); 
+      val = sg->buzz->tick();
+      *samples++ = val;
+      *samples++ = val;  
     } else if ( sg->mode == 3 ) { // formant filter hiss
-      *samples++ = sg->vox->tick( sg->hiss->tick() );
+      val = sg->vox->tick( sg->hiss->tick() );
+      *samples++ = val;
+      *samples++ = val;
     } else if ( sg->mode == 4 ) { // formant filter buzz
-      *samples++ = sg->vox->tick( sg->buzz->tick() );
+      val = sg->vox->tick( sg->buzz->tick() );
+      *samples++ = val;
+      *samples++ = val;
     }
   }
 
@@ -82,7 +92,7 @@ int main( int argc, char ** argv ) {
   // Setup stream
   RtAudio::StreamParameters params;
   params.deviceId = dac.getDefaultOutputDevice();
-  params.nChannels = 1;
+  params.nChannels = 2;
   // check if 64 or 32 bit
   RtAudioFormat format = ( sizeof(StkFloat) == 8 ) ? RTAUDIO_FLOAT64 : RTAUDIO_FLOAT32;
   unsigned int bufferFrames = RT_BUFFER_SIZE;
@@ -131,3 +141,24 @@ int main( int argc, char ** argv ) {
   return 0;
 }
 
+<<<<<<< HEAD
+=======
+
+void error_callback(int error, const char* description) {
+    std::cerr << "Error: " << description << std::endl;
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, 0);
+    
+		gui::Window* w = (gui::Window*)glfwGetWindowUserPointer(window);
+    
+    if (action != GLFW_RELEASE)
+        w->setKey(key, true);
+    else 
+        w->setKey(key, false);
+    
+}
+
+>>>>>>> 9cce10e8d1ec70c4667f3137e9b84284ac7bfe6a
