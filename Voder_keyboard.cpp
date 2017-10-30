@@ -6,9 +6,7 @@
  *
  *=================================*/
 
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
-#include "Window.h"
+#include "Window.h"    //Must include window first becasue it hold the glew.h include which must always be included first
 #include "FormSwep.h"  // Sweepable Formant Filter
 #include "Noise.h"     // White Noise
 #include "BlitSaw.h"   // Sawtooth
@@ -54,28 +52,10 @@ static void key_callback( GLFWwindow * window, int key, int scancode, int action
 
 int main( int argc, char ** argv ) {
 
-	// Initialize GLFW 
-	if (!glfwInit()) {
-		std::cerr << "GLFW could NOT init!" << std::endl;
-		return -1;
-	}
-
-	// Set error callback for GLFW
-	glfwSetErrorCallback(error_callback);
-
 	
-	// Create Window
-	gui::Window * win = new gui::Window("Voder Keyboard Example", 640, 480);
+  // Create Window
+  gui::Window * win = new gui::Window("Voder Keyboard Example", 640, 480);
 
-	// Initialize GLEW
-	glewInit();
-	/*	if ( glewInit() != GLEW_OKAY ) {
-		std::cerr << "GLEW could not init!" << std::endl;
-		}*/
-
-	// Set keyboard callback
-	glfwSetKeyCallback(win->getWindowPtr(), key_callback);
-    	
   // Set global sample rate
   Stk::setSampleRate( 44100.0 );
 
@@ -149,23 +129,5 @@ int main( int argc, char ** argv ) {
  cleanup:
 	delete win;
   return 0;
-}
-
-
-void error_callback(int error, const char* description) {
-    std::cerr << "Error: " << description << std::endl;
-}
-
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    
-		gui::Window* w = (gui::Window*)glfwGetWindowUserPointer(window);
-    
-    if (action != GLFW_RELEASE)
-        w->setKey(key, true);
-    else 
-        w->setKey(key, false);
-    
 }
 
