@@ -1,4 +1,2 @@
-﻿  Window.cpp
-  Windows-TestMain.cpp
-  Generating Code...
+﻿LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Voder2017.vcxproj -> F:\Dev\Voder2017\Windows-bin\Debug\x64\Voder2017.exe
