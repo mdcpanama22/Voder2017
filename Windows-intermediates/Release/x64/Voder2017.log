@@ -1,5 +1,0 @@
-﻿  Window.cpp
-  Windows-TestMain.cpp
-  Generating Code...
-Window.obj : error LNK2019: unresolved external symbol __imp_glClear referenced in function "public: void __cdecl gui::Window::clear(void)" (?clear@Window@gui@@QEAAXXZ)
-Windows-bin\Release\x64\Voder2017.exe : fatal error LNK1120: 1 unresolved externals

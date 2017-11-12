@@ -6,7 +6,9 @@
  *
  *=================================*/
 
-#include "Window.h"    //Must include window first becasue it hold the glew.h include which must always be included first
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
+#include "Window.h"
 #include "FormSwep.h"  // Sweepable Formant Filter
 #include "Noise.h"     // White Noise
 #include "BlitSaw.h"   // Sawtooth
@@ -29,28 +31,18 @@ int tick( void * outBuff, void * inBuff, unsigned int nBuffFrames,
   SoundGens * sg = (SoundGens *) dataPtr;
 
   register StkFloat * samples = (StkFloat *) outBuff;
-  StkFloat val;
   
   for ( unsigned int i=0; i < nBuffFrames; ++i ) {
     if ( sg->mode == 0 ) { // silent
       *samples++ = 0;
-      *samples++ = 0;
     } else if ( sg->mode == 1 ) { // hiss
-      val = sg->hiss->tick();
-      *samples++ =  val;
-      *samples++ = val;
+      *samples++ = sg->hiss->tick(); 
     } else if ( sg->mode == 2 ) { // buzz
-      val = sg->buzz->tick();
-      *samples++ = val;
-      *samples++ = val;  
+      *samples++ = sg->buzz->tick(); 
     } else if ( sg->mode == 3 ) { // formant filter hiss
-      val = sg->vox->tick( sg->hiss->tick() );
-      *samples++ = val;
-      *samples++ = val;
+      *samples++ = sg->vox->tick( sg->hiss->tick() );
     } else if ( sg->mode == 4 ) { // formant filter buzz
-      val = sg->vox->tick( sg->buzz->tick() );
-      *samples++ = val;
-      *samples++ = val;
+      *samples++ = sg->vox->tick( sg->buzz->tick() );
     }
   }
 
@@ -62,10 +54,28 @@ static void key_callback( GLFWwindow * window, int key, int scancode, int action
 
 int main( int argc, char ** argv ) {
 
-	
-  // Create Window
-  gui::Window * win = new gui::Window("Voder Keyboard Example", 640, 480);
+	// Initialize GLFW 
+	if (!glfwInit()) {
+		std::cerr << "GLFW could NOT init!" << std::endl;
+		return -1;
+	}
 
+	// Set error callback for GLFW
+	glfwSetErrorCallback(error_callback);
+
+	
+	// Create Window
+	gui::Window * win = new gui::Window("Voder Keyboard Example", 640, 480);
+
+	// Initialize GLEW
+	glewInit();
+	/*	if ( glewInit() != GLEW_OKAY ) {
+		std::cerr << "GLEW could not init!" << std::endl;
+		}*/
+
+	// Set keyboard callback
+	glfwSetKeyCallback(win->getWindowPtr(), key_callback);
+    	
   // Set global sample rate
   Stk::setSampleRate( 44100.0 );
 
@@ -92,7 +102,7 @@ int main( int argc, char ** argv ) {
   // Setup stream
   RtAudio::StreamParameters params;
   params.deviceId = dac.getDefaultOutputDevice();
-  params.nChannels = 2;
+  params.nChannels = 1;
   // check if 64 or 32 bit
   RtAudioFormat format = ( sizeof(StkFloat) == 8 ) ? RTAUDIO_FLOAT64 : RTAUDIO_FLOAT32;
   unsigned int bufferFrames = RT_BUFFER_SIZE;
@@ -141,8 +151,6 @@ int main( int argc, char ** argv ) {
   return 0;
 }
 
-<<<<<<< HEAD
-=======
 
 void error_callback(int error, const char* description) {
     std::cerr << "Error: " << description << std::endl;
@@ -150,7 +158,7 @@ void error_callback(int error, const char* description) {
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, 0);
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
     
 		gui::Window* w = (gui::Window*)glfwGetWindowUserPointer(window);
     
@@ -161,4 +169,3 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     
 }
 
->>>>>>> 9cce10e8d1ec70c4667f3137e9b84284ac7bfe6a
