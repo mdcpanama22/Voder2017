@@ -25,20 +25,30 @@ struct SoundGens {
 int tick( void * outBuff, void * inBuff, unsigned int nBuffFrames,
 	  double streamTime, RtAudioStreamStatus status, void * dataPtr ) {
   SoundGens * sg = (SoundGens *) dataPtr;
-
+  StkFloat val;
+  
   register StkFloat * samples = (StkFloat *) outBuff;
   
   for ( unsigned int i=0; i < nBuffFrames; ++i ) {
     if ( sg->mode == 0 ) { // silent
       *samples++ = 0;
+      *samples++ = 0;
     } else if ( sg->mode == 1 ) { // hiss
-      *samples++ = sg->hiss->tick(); 
+      val = sg->hiss->tick();
+      *samples++ = val;
+      *samples++ = val;
     } else if ( sg->mode == 2 ) { // buzz
-      *samples++ = sg->buzz->tick(); 
+      val = sg->buzz->tick();
+      *samples++ = val;
+      *samples++ = val;
     } else if ( sg->mode == 3 ) { // formant filter hiss
-      *samples++ = sg->vox->tick( sg->hiss->tick() );
+      val = sg->vox->tick( sg->hiss->tick() );
+      *samples++ = val;
+      *samples++ = val;
     } else if ( sg->mode == 4 ) { // formant filter buzz
-      *samples++ = sg->vox->tick( sg->buzz->tick() );
+      val = sg->vox->tick( sg->buzz->tick() );
+      *samples++ = val;
+      *samples++ = val;
     }
   }
 
@@ -73,7 +83,7 @@ int main( int argc, char ** argv ) {
   // Setup stream
   RtAudio::StreamParameters params;
   params.deviceId = dac.getDefaultOutputDevice();
-  params.nChannels = 1;
+  params.nChannels = 2;
   // check if 64 or 32 bit
   RtAudioFormat format = ( sizeof(StkFloat) == 8 ) ? RTAUDIO_FLOAT64 : RTAUDIO_FLOAT32;
   unsigned int bufferFrames = RT_BUFFER_SIZE;
