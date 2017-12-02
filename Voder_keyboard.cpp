@@ -241,16 +241,16 @@ void set_up( SoundGens & sg ) {
   }
 
   // Setup formant filters
-  filter[0]->setStates(  225, 0.9, 1.0 ); // 000 - 225
-  filter[1]->setStates(  450, 0.9, 1.0 ); // 255 - 450
-  filter[2]->setStates(  700, 0.9, 1.0 ); // 450 - 700
-  filter[3]->setStates( 1000, 0.9, 1.0 ); // 700 - 1000
-  filter[4]->setStates( 1400, 0.9, 1.0 ); // 1000 - 1400
-  filter[5]->setStates( 2000, 0.9, 1.0 ); // 1400 - 2000
-  filter[6]->setStates( 2700, 0.9, 1.0 ); // 2000 - 2700
-  filter[7]->setStates( 3800, 0.9, 1.0 ); // 2700 - 3800
-  filter[8]->setStates( 5400, 0.9, 1.0 ); // 3800 - 5400
-  filter[9]->setStates( 7500, 0.9, 1.0 ); // 5400 - 7500
+  filter[0]->setStates(  225, 0.99, 1.0 ); // 000 - 225
+  filter[1]->setStates(  450, 0.99, 1.0 ); // 255 - 450
+  filter[2]->setStates(  700, 0.99, 1.0 ); // 450 - 700
+  filter[3]->setStates( 1000, 0.99, 1.0 ); // 700 - 1000
+  filter[4]->setStates( 1400, 0.99, 1.0 ); // 1000 - 1400
+  filter[5]->setStates( 2000, 0.99, 1.0 ); // 1400 - 2000
+  filter[6]->setStates( 2700, 0.99, 1.0 ); // 2000 - 2700
+  filter[7]->setStates( 3800, 0.99, 1.0 ); // 2700 - 3800
+  filter[8]->setStates( 5400, 0.99, 1.0 ); // 3800 - 5400
+  filter[9]->setStates( 7500, 0.99, 1.0 ); // 5400 - 7500
 
   // Pass sound generators into container
   sg.hiss = hiss;
