@@ -41,7 +41,9 @@ void clean_up( SoundGens & sg );   // Deallocate Voder Struct
 void error_callback( int error, const char * description );
 static void key_callback( GLFWwindow * window, int key, int scancode, int action, int mods );
 
+// Keyboard functions
 void read_keys( gui::Window * win, SoundGens & base );
+int trinary_button( gui::Window * win, int key1, int key2, int key3 );
 
 void chart();
 
@@ -61,9 +63,9 @@ int tick( void * outBuff, void * inBuff, unsigned int nBuffFrames,
   SoundGens * sg = (SoundGens *) dataPtr;
   
   register StkFloat * samples = (StkFloat *) outBuff;
-  StkFloat val, hval, bval;
-
-	sg->buzz->setFrequency( sg->pitch );
+  StkFloat val, hval, bval, loudness;
+  
+  sg->buzz->setFrequency( sg->pitch );
 	
   for ( unsigned int i=0; i < nBuffFrames; ++i ) {
     val = 0;
@@ -71,24 +73,21 @@ int tick( void * outBuff, void * inBuff, unsigned int nBuffFrames,
     bval = sg->buzz->tick();
     for ( unsigned int j = 0; j < 10; ++j ) {
       // Each filter
-      if ( sg->button_states[j] == 0 ) {
-				// filter off
-      } 
-      else if ( sg->button_states[j] == 3 ) { // High filter (q-p)
-				if ( sg->mode == 0 ) {
-				  val += sg->keys[j]->tick( hval );
-				} 
-				else {
-				  val += sg->keys[j]->tick( bval );
-				}
+      if ( sg->button_states[j] != 0 ) {
+	  loudness = sg->button_states[j] / 3.0;
+	  if ( sg->mode == 0 ) {
+	      val += sg->keys[j]->tick( hval ) * loudness;
+	  } 
+	  else {
+	      val += sg->keys[j]->tick( bval ) * loudness;
+	  }
       }
     }
     
     // Output value of all active filters
-		val *= sg->volume;
+    val *= (StkFloat) sg->volume;
     *samples++ = val;
     *samples++ = val;
-    //std::cout << val << " (h:" << hval <<", b:" << bval << ")" << std::endl;
   }
 
   return 0;
@@ -100,9 +99,9 @@ void set_up( SoundGens & sg ) {
   Noise * hiss = new Noise();
   BlitSaw * buzz = new BlitSaw();
 
-	// Set pitch and volume
-	sg.pitch = 200;
-	sg.volume = 1.0;
+  // Set pitch and volume
+  sg.pitch = 200;
+  sg.volume = 1.0;
 	
   // Setup generators
   buzz->setFrequency( sg.pitch );
@@ -172,82 +171,53 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 void read_keys( gui::Window * win, SoundGens & base ) {
-	float pd = 10.0;
-	float pv = 0.05;
-	
-	if ( win->isKeyPressed( GLFW_KEY_SPACE ) ) {
-		base.mode = 0;
-	} else {
-		base.mode = 1;
-	}
-
-
-	if ( win->isKeyPressed( GLFW_KEY_UP ) ) {
-		base.pitch += pd;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_DOWN ) ) {
-		base.pitch = (base.pitch - pd > 0) ? base.pitch - pd : base.pitch;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_RIGHT ) ) {
-		base.volume = (base.volume + pv < 3.0) ? base.volume - pv : base.volume;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_LEFT ) ) {
-		base.volume = (base.volume - pv > 0) ? base.volume - pv : base.volume;
-	}
-	
-	
-	if ( win->isKeyPressed( GLFW_KEY_Q ) ) {
-		base.button_states[0] = 3;
-	} else {
-		base.button_states[0] = 0;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_W ) ) {
-		base.button_states[1] = 3;
-	} else {
-		base.button_states[1] = 0;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_E ) ) {
-		base.button_states[2] = 3;
-	} else {
-		base.button_states[2] = 0;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_R ) ) {
-		base.button_states[3] = 3;
-	} else {
-		base.button_states[3] = 0;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_T ) ) {
-		base.button_states[4] = 3;
-	} else {
-		base.button_states[4] = 0;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_Y ) ) {
-		base.button_states[5] = 3;
-	} else {
-		base.button_states[5] = 0;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_U ) ) {
-		base.button_states[6] = 3;
-	} else {
-		base.button_states[6] = 0;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_I ) ) {
-		base.button_states[7] = 3;
-	} else {
-		base.button_states[7] = 0;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_O ) ) {
-		base.button_states[8] = 3;
-	} else {
-		base.button_states[8] = 0;
-	}
-	if ( win->isKeyPressed( GLFW_KEY_P ) ) {
-		base.button_states[9] = 3;
-	} else {
-		base.button_states[9] = 0;
-	}
+    float pd = 5.0;
+    float pv = 0.02;
+    
+    base.mode = (win->isKeyPressed( GLFW_KEY_SPACE ) ) ? 0 : 1;
+    
+    // Pitch
+    if ( win->isKeyPressed( GLFW_KEY_UP ) ) {
+	base.pitch += pd;
+    }
+    if ( win->isKeyPressed( GLFW_KEY_DOWN ) ) {
+	base.pitch = (base.pitch - pd > 0) ? base.pitch - pd : base.pitch;
+    }
+    // Volume
+    if ( win->isKeyPressed( GLFW_KEY_RIGHT ) ) {
+	base.volume = (base.volume + pv < 3.0) ? base.volume + pv : base.volume;
+    }
+    if ( win->isKeyPressed( GLFW_KEY_LEFT ) ) {
+	base.volume = (base.volume - pv > 0) ? base.volume - pv : base.volume;
+    }
+    
+    
+    // Left Hand
+    base.button_states[0] = trinary_button( win, GLFW_KEY_Z, GLFW_KEY_A, GLFW_KEY_Q );
+    base.button_states[1] = trinary_button( win, GLFW_KEY_X, GLFW_KEY_S, GLFW_KEY_W );
+    base.button_states[2] = trinary_button( win, GLFW_KEY_C, GLFW_KEY_D, GLFW_KEY_E );
+    base.button_states[3] = trinary_button( win, GLFW_KEY_V, GLFW_KEY_F, GLFW_KEY_R );
+    base.button_states[4] = trinary_button( win, GLFW_KEY_B, GLFW_KEY_G, GLFW_KEY_T );
+    // Right Hand
+    base.button_states[5] = trinary_button( win, GLFW_KEY_N, GLFW_KEY_H, GLFW_KEY_Y );
+    base.button_states[6] = trinary_button( win, GLFW_KEY_M, GLFW_KEY_J, GLFW_KEY_U );
+    base.button_states[7] = trinary_button( win, GLFW_KEY_COMMA, GLFW_KEY_K, GLFW_KEY_I );
+    base.button_states[8] = trinary_button( win, GLFW_KEY_PERIOD, GLFW_KEY_L, GLFW_KEY_O );
+    base.button_states[9] = trinary_button( win, GLFW_KEY_SLASH, GLFW_KEY_SEMICOLON, GLFW_KEY_P );
+    
 }
 
+int trinary_button( gui::Window * win, int key1, int key2, int key3 ) {
+    if ( win->isKeyPressed( key1 ) ) {
+	return 1;
+    } if ( win->isKeyPressed( key2 ) ){
+	return 2;
+    } if ( win->isKeyPressed( key3 ) ) {
+	return 3;
+    }
+    return 0;
+}
+	
 // Display key bindings
 void chart() {
 	std::cout << "Voder keys:" << std::endl;
