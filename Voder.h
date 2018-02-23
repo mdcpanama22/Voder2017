@@ -23,8 +23,8 @@ using namespace stk;
 struct SoundGens {
   Noise * hiss;         // hiss generator
   BlitSaw * buzz;       // buzz generator
-	float pitch;          // frequency for buzz
-	float volume;         // percent voume multiplier
+  float pitch;          // frequency for buzz
+  float volume;         // percent voume multiplier
   int mode;             // hiss = 0, buzz = 1
   int * button_states;  // buttons states
   FormSwep ** keys;     // Formant filters
@@ -49,7 +49,7 @@ void chart();
 
 // Callback Function for Realtime Audio
 int tick( void * outBuff, void * inBuff, unsigned int nBuffFrames,
-					double streamTime, RtAudioStreamStatus status, void * dataPtr );
+	  double streamTime, RtAudioStreamStatus status, void * dataPtr );
 
 // ===================================================
 // Functions:
@@ -71,6 +71,8 @@ int tick( void * outBuff, void * inBuff, unsigned int nBuffFrames,
     val = 0;
     hval = sg->hiss->tick();
     bval = sg->buzz->tick();
+
+    //TODO: if plosive active set mode and switch after timer runs out
     for ( unsigned int j = 0; j < 10; ++j ) {
       // Each filter
       if ( sg->button_states[j] != 0 ) {
@@ -82,6 +84,13 @@ int tick( void * outBuff, void * inBuff, unsigned int nBuffFrames,
 	      val += sg->keys[j]->tick( bval ) * loudness;
 	  }
       }
+    }
+    if ( sg->button_states[10] != 0 ) {
+	val = 0;
+    } else if ( sg->button_states[11] != 0 ) {
+	val = 0;
+    } else if ( sg->button_states[12] != 0 ) {
+	val = 0;
     }
     
     // Output value of all active filters
@@ -107,8 +116,8 @@ void set_up( SoundGens & sg ) {
   buzz->setFrequency( sg.pitch );
   
   // Make button_states
-  int * bs = new int[10];   // *** Currently only 10 filters
-  for ( unsigned int i = 0; i < 10; ++i ) {
+  int * bs = new int[13];   // 10 Filters and 3 stop consonants
+  for ( unsigned int i = 0; i < 13; ++i ) {
     bs[i] = 0;
   }
 
@@ -171,26 +180,31 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 void read_keys( gui::Window * win, SoundGens & base ) {
-    float pd = 5.0;
-    float pv = 0.02;
+    float dp = 0.05;
+    float dv = 0.005;
     
     base.mode = (win->isKeyPressed( GLFW_KEY_SPACE ) ) ? 0 : 1;
     
     // Pitch
     if ( win->isKeyPressed( GLFW_KEY_UP ) ) {
-	base.pitch += pd;
+	base.pitch += dp;
     }
     if ( win->isKeyPressed( GLFW_KEY_DOWN ) ) {
-	base.pitch = (base.pitch - pd > 0) ? base.pitch - pd : base.pitch;
+	base.pitch = (base.pitch - dp > 0) ? base.pitch - dp : base.pitch;
     }
     // Volume
     if ( win->isKeyPressed( GLFW_KEY_RIGHT ) ) {
-	base.volume = (base.volume + pv < 3.0) ? base.volume + pv : base.volume;
+	base.volume = (base.volume + dv < 3.0) ? base.volume + dv : base.volume;
     }
     if ( win->isKeyPressed( GLFW_KEY_LEFT ) ) {
-	base.volume = (base.volume - pv > 0) ? base.volume - pv : base.volume;
+	base.volume = (base.volume - dv > 0) ? base.volume - dv : base.volume;
     }
-    
+
+    // Reset
+    if ( win->isKeyPressed( GLFW_KEY_0 ) ) {
+	base.volume = 1.0;
+	base.pitch = 200;
+    }
     
     // Left Hand
     base.button_states[0] = trinary_button( win, GLFW_KEY_Z, GLFW_KEY_A, GLFW_KEY_Q );
@@ -204,6 +218,14 @@ void read_keys( gui::Window * win, SoundGens & base ) {
     base.button_states[7] = trinary_button( win, GLFW_KEY_COMMA, GLFW_KEY_K, GLFW_KEY_I );
     base.button_states[8] = trinary_button( win, GLFW_KEY_PERIOD, GLFW_KEY_L, GLFW_KEY_O );
     base.button_states[9] = trinary_button( win, GLFW_KEY_SLASH, GLFW_KEY_SEMICOLON, GLFW_KEY_P );
+    // Plosives
+    base.button_states[10] = (win->isKeyPressed( GLFW_KEY_1 ) ) ? 1 : 0;
+    base.button_states[11] = (win->isKeyPressed( GLFW_KEY_2 ) ) ? 1 : 0;
+    base.button_states[12] = (win->isKeyPressed( GLFW_KEY_3 ) ) ? 1 : 0;
+    // Notes:
+    // when released start timer and switch timer
+    // timer counts down to end
+    // switch timer is how long to switch from hiss to buzz
     
 }
 
