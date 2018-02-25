@@ -57,6 +57,17 @@ It can be used for text-to-speech without the need of any sound recordings.
 git clone
 make
 ```
+
+#### Operating the programs
+
+After compiling the code there will be various programs:
+
+example - Simple test of sound generators and Formant filters.
+
+keyboard_example - Prototype of Voder recreation: uses Q-P keys to control filters and Space to switch sound generators.
+
+voder1 - More completed prototype. Some code redesigns and contains filters on most keys, (Q-P,A-;,Z-/). As well as controls for pitch and volume. GUI has not yet been finalized.
+
 #### Installing STK by itself
 
 [Download Page](https://ccrma.stanford.edu/software/stk/download.html)
