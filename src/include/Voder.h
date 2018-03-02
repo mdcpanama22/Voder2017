@@ -41,8 +41,8 @@ void clean_up( SoundGens & sg );   // Deallocate Voder Struct
 void error_callback( int error, const char * description );
 
 // Keyboard functions
-void read_keys( core::graphics::Window * win, SoundGens & base );
-int trinary_button( core::graphics::Window * win, int key1, int key2, int key3 );
+void read_keys( const core::graphics::Window * win, SoundGens & base );
+int trinary_button( const core::graphics::Window * win, int key1, int key2, int key3 );
 
 void chart();
 
@@ -157,7 +157,7 @@ void error_callback(int error, const char* description) {
 
 
 
-void read_keys( core::graphics::Window * win, SoundGens & base ) {
+void read_keys( const core::graphics::Window * win, SoundGens & base ) {
     float pd = 5.0;
     float pv = 0.02;
     
@@ -194,7 +194,7 @@ void read_keys( core::graphics::Window * win, SoundGens & base ) {
     
 }
 
-int trinary_button( core::graphics::Window * win, int key1, int key2, int key3 ) {
+int trinary_button( const core::graphics::Window * win, int key1, int key2, int key3 ) {
     if ( win->isKeyPressed( key1 ) ) {
 	return 1;
     } if ( win->isKeyPressed( key2 ) ){

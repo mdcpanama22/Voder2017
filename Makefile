@@ -81,4 +81,4 @@ FF_SRC_FILES = src/main.cpp
 FF_SOURCES = $(BUFFER_FILES) $(GRAPHICS_FILES) $(MATH_FILES) $(SRC_FILES)
 
 voder_fall: src/main.cpp $(VODER_OBJS)
-		$(CC) $(LDFLAGS) $(CFLAGS) $(FF_CFLAGS) $(DEFS) -o voder1.out src/main.cpp $(VODER_FILES)  $(LIBRARY2)
+		$(CC) $(LDFLAGS) $(CFLAGS) $(FF_CFLAGS) $(DEFS) -o VoderEngine.out src/main.cpp $(VODER_FILES) $(FF_SOURCES) $(LIBRARY2)
