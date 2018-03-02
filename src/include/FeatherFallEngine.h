@@ -24,6 +24,6 @@
 #include "../math/mat4.h"
 
 //Voder Includes
-#include "../voder/include/Voder.h" //this will currently be an issue due to includes in the file
+#include "Voder.h" //this will currently be an issue due to includes in the file
 
 #include "debuging.h"
