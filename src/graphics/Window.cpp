@@ -39,8 +39,8 @@ namespace core { namespace graphics {
 		image.width = w;
 		image.height = h;
 		image.pixels = rgb;
-		glfwSetWindowIcon(window, 1, &image);
-		stbi_image_free(rgb);
+		//glfwSetWindowIcon(window, 1, &image);
+		//stbi_image_free(rgb);
 		
 		//Make OpenGL context Current
 		glfwMakeContextCurrent(window);
