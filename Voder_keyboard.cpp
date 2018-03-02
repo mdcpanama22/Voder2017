@@ -8,7 +8,7 @@
 
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-#include "Window.h"
+#include "Old_Window.h"
 #include "FormSwep.h"  // Sweepable Formant Filter
 #include "Noise.h"     // White Noise
 #include "BlitSaw.h"   // Sawtooth

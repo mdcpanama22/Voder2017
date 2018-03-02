@@ -4,7 +4,7 @@
 ###   voder_keyboard  - rudimentary voder
 ###   voder1          - redesigned voder
 
-PROGRAMS = voder_ex voder_key voder_key2
+PROGRAMS = voder_ex voder_key voder_key2 voder_fall
 RM = /bin/rm
 SRC_PATH = src/voder
 OBJECT_PATH = Release
@@ -36,6 +36,9 @@ endif
 %.o : include/%.cpp $(OBJECT_PATH)/.placeholder
 	$(CC) $(CFLAGS) $(DEFS) -c $(<) -o $(OBJECT_PATH)/$@
 
+%.o : $(SRC_PATH)/voder/%.cpp $(OBJECT_PATH)/.placeholder
+	$(CC) $(CFLAGS) $(DEFS) -c $(<) -o $(OBJECT_PATH)/$@
+
 all : $(PROGRAMS)
 
 $(OBJECT_PATH)/.placeholder:
@@ -52,9 +55,22 @@ clean :
 distclean: clean
 	$(RM) Makefile
 
+VODER_FILES = $(OBJECT_PATH)/Stk.o $(OBJECT_PATH)/BlitSaw.o $(OBJECT_PATH)/Noise.o $(OBJECT_PATH)/RtAudio.o $(OBJECT_PATH)/FormSwep.o
 
 
-## Featherfall Lines
+# BASIC VODER EXAMPLES
+
+voder_ex: Voder_example.cpp Stk.o BlitSaw.o Noise.o RtAudio.o FormSwep.o
+		$(CC) $(LDFLAGS) $(CFLAGS) $(DEFS) -o example Voder_example.cpp $(VODER_FILES)  $(LIBRARY1)
+
+voder_key: Voder_keyboard.cpp Window.o Stk.o BlitSaw.o Noise.o RtAudio.o FormSwep.o
+		$(CC) $(LDFLAGS) $(CFLAGS) $(DEFS) -o keyboard_example Voder_keyboard.cpp $(VODER_FILES) $(OBJECT_PATH)/Window.o  $(LIBRARY2)
+
+voder_key2: Voder_kb2.cpp Window.o Stk.o BlitSaw.o Noise.o RtAudio.o FormSwep.o
+		$(CC) $(LDFLAGS) $(CFLAGS) $(DEFS) -o voder1 Voder_kb2.cpp $(VODER_FILES) $(OBJECT_PATH)/Window.o  $(LIBRARY2)
+
+
+# FEATHER FALL ENGINE VODER
 
 #Compiler Flags
 FF_CFLAGS = -fpermissive
@@ -71,16 +87,5 @@ FF_SRC_FILES = src/main.cpp
 #All Source File Names
 FF_SOURCES = $(BUFFER_FILES) $(GRAPHICS_FILES) $(MATH_FILES) $(SRC_FILES)
 
-
-## END OF FEATHERFALL
-
-VODER_FILES = $(OBJECT_PATH)/Stk.o $(OBJECT_PATH)/BlitSaw.o $(OBJECT_PATH)/Noise.o $(OBJECT_PATH)/RtAudio.o $(OBJECT_PATH)/FormSwep.o
-
-voder_ex: src/voder/Voder_example.cpp Stk.o BlitSaw.o Noise.o RtAudio.o FormSwep.o
-		$(CC) $(LDFLAGS) $(CFLAGS) $(DEFS) -o example src/voder/Voder_example.cpp $(VODER_FILES)  $(LIBRARY1)
-
-voder_key: Voder_keyboard.cpp Window.o Stk.o BlitSaw.o Noise.o RtAudio.o FormSwep.o
-		$(CC) $(LDFLAGS) $(CFLAGS) $(DEFS) -o keyboard_example Voder_keyboard.cpp $(VODER_FILES) $(OBJECT_PATH)/Window.o  $(LIBRARY2)
-
-voder_key2: Voder_kb2.cpp Window.o Stk.o BlitSaw.o Noise.o RtAudio.o FormSwep.o
-		$(CC) $(LDFLAGS) $(CFLAGS) $(DEFS) -o voder1 Voder_kb2.cpp $(VODER_FILES) $(OBJECT_PATH)/Window.o  $(LIBRARY2)
+voder_fall: $(FF_SOURCES) $(VODER_FILES)
+		$(CC) $(LDFLAGS) $(CFLAGS) $(DEFS) -o voder1 $(FF_SOURCES) $(VODER_FILES) $(LIBRARY2)
