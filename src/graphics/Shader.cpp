@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "../debuging.h"
+#include "../include/debuging.h"
 
 namespace core { namespace graphics {
 

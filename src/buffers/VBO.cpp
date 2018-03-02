@@ -1,6 +1,6 @@
 #include <GL/glew.h>
 #include "VBO.h"
-#include "../debuging.h"
+#include "../include/debuging.h"
 
 namespace core { namespace buffers {
 

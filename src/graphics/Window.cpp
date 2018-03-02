@@ -4,7 +4,7 @@
 
 #include <iostream>
 //#include "../logging/Logging.h"
-#include "../debuging.h"
+#include "../include/debuging.h"
 
 namespace core { namespace graphics {
 
