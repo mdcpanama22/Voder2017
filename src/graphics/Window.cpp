@@ -4,7 +4,7 @@
 
 #include <iostream>
 //#include "../logging/Logging.h"
-#include "../include/debuging.h"
+#include "../include/debugging.h"
 
 namespace core { namespace graphics {
 
@@ -14,12 +14,13 @@ namespace core { namespace graphics {
 		//Init GLFW
 		if (!glfwInit()) { //LOG THIS
 			//Log::printError("GLFW failed to Initalize!");
+			std::cout << "GLFW failed to init!" << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
 		//Set OpenGL type
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 		//Create Window
@@ -28,6 +29,7 @@ namespace core { namespace graphics {
 		//Make sure window exists
 		if (!window) {//LOG THIS
 			//Log::printError("Window was not created!");
+			std::cout << "Window was not created!" << std::endl;
 			glfwTerminate();
 			exit(EXIT_FAILURE);
 		}
@@ -48,6 +50,7 @@ namespace core { namespace graphics {
 		//Init GLEW
 		if (glewInit() != GLEW_OK) {//LOG THIS
 			//Log::printError("GLEW Failed to Initialize!");
+			std::cout << "GLEW failed to Init!" << std::endl;
 		}
 
 		//Print OpenGL version (should remove this and make the Logger do this)

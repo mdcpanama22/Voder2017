@@ -3,23 +3,24 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "../include/debuging.h"
+#include "../include/debugging.h"
 
 namespace core { namespace graphics {
 
 	struct ShaderProgramSource {
 		std::string VertexSource;
 		std::string FragmentSource;
+		std::string GeometrySource;
 	};
 	static ShaderProgramSource parseShader(const std::string& filepath) {
 		std::ifstream stream(filepath);
 
 		enum class ShaderType {
-			NONE = -1, VERTEX = 0, FRAGMENT = 1
+			NONE = -1, VERTEX = 0, FRAGMENT = 1, GEOMETRY = 2
 		};
 
 		std::string line;
-		std::stringstream ss[2];
+		std::stringstream ss[3];
 		ShaderType type = ShaderType::NONE;
 
 		while (getline(stream, line)) {
@@ -28,14 +29,15 @@ namespace core { namespace graphics {
 					type = ShaderType::VERTEX;
 				else if (line.find("fragment") != std::string::npos)
 					type = ShaderType::FRAGMENT;
-
+				else if (line.find("geometry") != std::string::npos)
+					type = ShaderType::GEOMETRY;
 			}
 			else {
 				ss[(int)type] << line << "\n";
 			}
 		}
 
-		return { ss[0].str(), ss[1].str() };
+		return { ss[0].str(), ss[1].str(), ss[2].str() };
 	}
 	static unsigned int compileShader(unsigned int type, const std::string& source) {
 		GLCall(unsigned int id = glCreateShader(type));
@@ -50,7 +52,16 @@ namespace core { namespace graphics {
 			GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
 			char* message = (char*)alloca(length * sizeof(char));
 			GLCall(glGetShaderInfoLog(id, length, &length, message));
-			std::cout << "FAILED TO COMPILE " << (type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT") << " SHADER!" << std::endl;
+			std::cout << "FAILED TO COMPILE ";
+			switch (type) {
+			case GL_VERTEX_SHADER:
+				std::cout << "VERTEX ";
+			case GL_FRAGMENT_SHADER:
+				std::cout << "FRAGMENT ";
+			case GL_GEOMETRY_SHADER:
+				std::cout << "GEOMETRY ";
+			}
+			std::cout << "SHADER" << std::endl;
 			std::cout << message << std::endl;
 			GLCall(glDeleteShader(id));
 			return 0;
@@ -59,11 +70,17 @@ namespace core { namespace graphics {
 		return id;
 
 	}
-	static unsigned int createShader(const std::string& vs, const std::string& fs) {
+	static unsigned int createShader(const std::string& vs, const std::string& fs, const std::string& gs) {
 
 		GLCall(unsigned int program = glCreateProgram());
 		unsigned int vertShader = compileShader(GL_VERTEX_SHADER, vs);
 		unsigned int fragShader = compileShader(GL_FRAGMENT_SHADER, fs);
+		unsigned int geomShader = 0;
+
+		if (!gs.empty()) { //make sure the program has this
+			geomShader = compileShader(GL_GEOMETRY_SHADER, gs);
+			GLCall(glAttachShader(program, geomShader));
+		}
 
 		GLCall(glAttachShader(program, vertShader));
 		GLCall(glAttachShader(program, fragShader));
@@ -72,6 +89,7 @@ namespace core { namespace graphics {
 
 		GLCall(glDeleteShader(vertShader));
 		GLCall(glDeleteShader(fragShader));
+		GLCall(glDeleteShader(geomShader));
 
 		return program;
 
@@ -79,7 +97,7 @@ namespace core { namespace graphics {
 	
 	Shader::Shader(const std::string& filepath) {
 		ShaderProgramSource src = parseShader(filepath);
-		shaderID = createShader(src.VertexSource, src.FragmentSource);
+		shaderID = createShader(src.VertexSource, src.FragmentSource, src.GeometrySource);
 
 	}
 
