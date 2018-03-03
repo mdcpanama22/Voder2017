@@ -166,8 +166,8 @@ void error_callback(int error, const char* description) {
 
 
 void read_keys( const core::graphics::Window * win, SoundGens & base ) {
-    float pd = 5.0;
-    float pv = 0.02;
+    float dp = 5.0;
+    float dv = 0.02;
     
     base.mode = (win->isKeyPressed( GLFW_KEY_SPACE ) ) ? 0 : 1;
     
