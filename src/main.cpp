@@ -115,7 +115,7 @@ int main() {
   VAO::addVertexAtribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 3));
   
   vec4 color(0.2f, 0.4f, 0.8f, 1.0f);
-  mat4 proj = mat4::persp(90, 16.0f / 9.0f, 0.0f, 1000.0f);
+  mat4 proj = mat4::ortho(-8.0f, 8.0f, -4.5f, 4.5f, 0.1f, 100.0f);
   mat4 view;
   mat4 rot = mat4::rotation(20.0f, vec3(0.0f, 0.0f, 1.0f));
   
@@ -124,7 +124,7 @@ int main() {
 			 WINDOW_WIDTH, WINDOW_HEIGHT);
   
   
-  Shader basic("res/shaders/Basic.shader");
+  Shader basic("res/shaders/Voder.shader");
   basic.bind();
   Shader::setUniformVec4(basic.getUniformLocation("col"), color);
   Shader::setUniformMat4(basic.getUniformLocation("rotMat"), rot);

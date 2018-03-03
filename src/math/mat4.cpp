@@ -39,9 +39,9 @@ namespace core { namespace math {
         out.elements[1 + 1 * 4] =  2.0f / (top - bottom);
         out.elements[2 + 2 * 4] = -2.0f / (far - near);
         
-        out.elements[0 + 3 * 4] = (right + left) / (right - left);
-        out.elements[1 + 3 * 4] = (top + bottom) / (top - bottom);
-        out.elements[2 + 3 * 4] = (far + near) / (far - near);
+        out.elements[0 + 3 * 4] = -1 * ((right + left) / (right - left));
+        out.elements[1 + 3 * 4] = -1 * ((top + bottom) / (top - bottom));
+        out.elements[2 + 3 * 4] = -1 * ((far + near) / (far - near));
         
         return out;
         
@@ -112,14 +112,14 @@ namespace core { namespace math {
         float z = axis.z;
         
         out.elements[0 + 0 * 4] = x * x * omc + c;
-        out.elements[1 + 0 * 4] = y * x * omc + z * s;
-        out.elements[2 + 0 * 4] = x * y * omc - z * s;
+        out.elements[1 + 0 * 4] = x * y * omc + z * s;
+        out.elements[2 + 0 * 4] = x * z * omc - y * s;
         
         out.elements[0 + 1 * 4] = x * y * omc - z * s;
         out.elements[1 + 1 * 4] = y * y * omc + c;
         out.elements[2 + 1 * 4] = y * z * omc + x * s;
         
-        out.elements[0 + 2 * 4] = x * y * omc + y * s;
+        out.elements[0 + 2 * 4] = x * z * omc + y * s;
         out.elements[1 + 2 * 4] = y * z * omc - x * s;
         out.elements[2 + 2 * 4] = z * z * omc + c;
         

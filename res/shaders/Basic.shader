@@ -24,7 +24,8 @@ void main() {
 	color = in_color;
 	gl_Position = projMat * viewMat * position;
 
-};
+}
+
 
 #shader fragment
 #version 330 core
@@ -40,4 +41,4 @@ void main() {
 	float intensity = 1.0 / length(pos - light_pos) * 0.25;
 	out_color = color * intensity;
 
-};
+}
