@@ -10,14 +10,14 @@
 
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-#include "Window.h"
+#include "../graphics/Window.h"
 #include "FormSwep.h"  // Sweepable Formant Filter
 #include "Noise.h"     // White Noise
 #include "BlitSaw.h"   // Sawtooth
 #include "RtAudio.h"   // Real Time Audio
 #include <iostream>    // I/O
 
-using namespace stk;
+using namespace stk; //WHY is there a using namespace in a header file??
 
 // Container for Sound Generators
 struct SoundGens {
@@ -39,11 +39,10 @@ void clean_up( SoundGens & sg );   // Deallocate Voder Struct
 
 // GUI functions
 void error_callback( int error, const char * description );
-static void key_callback( GLFWwindow * window, int key, int scancode, int action, int mods );
 
 // Keyboard functions
-void read_keys( gui::Window * win, SoundGens & base );
-int trinary_button( gui::Window * win, int key1, int key2, int key3 );
+void read_keys( const core::graphics::Window * win, SoundGens & base );
+int trinary_button( const core::graphics::Window * win, int key1, int key2, int key3 );
 
 void chart();
 
@@ -165,23 +164,10 @@ void error_callback(int error, const char* description) {
   std::cerr << "Error: " << description << std::endl;
 }
 
-//Key callback for GUI
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-    glfwSetWindowShouldClose(window, 1);
-  }
-  gui::Window* w = (gui::Window*)glfwGetWindowUserPointer(window);
-  
-  if (action != GLFW_RELEASE) {
-    w->setKey(key, true);
-  } else { 
-    w->setKey(key, false);
-  }
-}
 
-void read_keys( gui::Window * win, SoundGens & base ) {
-    float dp = 0.05;
-    float dv = 0.005;
+void read_keys( const core::graphics::Window * win, SoundGens & base ) {
+    float pd = 5.0;
+    float pv = 0.02;
     
     base.mode = (win->isKeyPressed( GLFW_KEY_SPACE ) ) ? 0 : 1;
     
@@ -229,7 +215,7 @@ void read_keys( gui::Window * win, SoundGens & base ) {
     
 }
 
-int trinary_button( gui::Window * win, int key1, int key2, int key3 ) {
+int trinary_button( const core::graphics::Window * win, int key1, int key2, int key3 ) {
     if ( win->isKeyPressed( key1 ) ) {
 	return 1;
     } if ( win->isKeyPressed( key2 ) ){
