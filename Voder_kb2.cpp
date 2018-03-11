@@ -48,7 +48,7 @@ int main( int argc, char ** argv ) {
   unsigned int bufferFrames = RT_BUFFER_SIZE;
   try {
     dac.openStream( &params, NULL, format, (unsigned int)Stk::sampleRate(),
-										&bufferFrames, &tick, (void *)&base );
+		    &bufferFrames, &tick, (void *)&base );
   } catch ( RtAudioError &error ) {
     error.printMessage();
     goto cleanup;
@@ -71,7 +71,7 @@ int main( int argc, char ** argv ) {
     win->update();
 
     // Check which keys are being pressed
-		read_keys( win, base );
+    read_keys( win, base );
 
   }
   

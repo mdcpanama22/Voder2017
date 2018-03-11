@@ -61,11 +61,14 @@ $(OBJECT_PATH)/.placeholder:
 
 clean : 
 	$(RM) -f $(OBJECT_PATH)/*.o
+	$(RM) -rf $(OBJECT_PATH)
 	$(RM) -f $(PROGRAMS) *.out
 	$(RM) -fR *~ *.dSYM
 
 distclean: clean
 	$(RM) Makefile
+
+debug:	voder_fall_debug
 
 ### === BASIC VODER EXAMPLE PROGRAMS ===
 
@@ -89,11 +92,8 @@ FF_OBJS  = IBO.o VAO.o VBO.o mat4.o vec2.o vec3.o vec4.o
 
 BUFFER_FILES = $(OBJECT_PATH)/IBO.o $(OBJECT_PATH)/VAO.o $(OBJECT_PATH)/VBO.o
 MATH_FILES = $(OBJECT_PATH)/mat4.o $(OBJECT_PATH)/vec2.o $(OBJECT_PATH)/vec3.o $(OBJECT_PATH)/vec4.o
-#GRAPHICS_FILES = $(OBJECT_PATH)/Camera.o  $(OBJECT_PATH)/Shader.o $(OBJECT_PATH)/Window.o
 
 FF_FILES = $(BUFFER_FILES) $(MATH_FILES)
-
-
 
 
 GRAPHICS_FILES = src/graphics/Camera.cpp src/graphics/Shader.cpp src/graphics/Window.cpp
@@ -106,3 +106,11 @@ FF_SOURCES = $(GRAPHICS_FILES) $(SRC_FILES)
 voder_fall: $(FF_SOURCES) $(FF_OBJS) $(VODER_OBJS)
 	$(CC) $(LDFLAGS) $(CFLAGS) $(FF_CFLAGS) $(DEFS) -o VoderEngine.out $(FF_SOURCES) $(VODER_FILES) $(FF_FILES) $(LIBRARY2)
 
+
+BUFFER_FILES_DEBUG = $(OBJECT_PATH)/IBO.o $(OBJECT_PATH)/VAO.o $(OBJECT_PATH)/VBO.o
+MATH_FILES_DEBUG = $(OBJECT_PATH)/mat4.o $(OBJECT_PATH)/vec2.o $(OBJECT_PATH)/vec3.o $(OBJECT_PATH)/vec4.o
+
+FF_FILES_DEBUG = $(BUFFER_FILES_DEBUG) $(MATH_FILES_DEBUG)
+
+voder_fall_debug: $(FF_SOURCES) $(FF_FILES_DEBUG) $(VODER_OBJS)
+	$(CC) $(LDFLAGS) $(CFLAGS) $(FF_CFLAGS) $(DEFS) -g -o VoderEngineDebug.out $(FF_SOURCES) $(VODER_FILES) $(FF_FILES_DEBUG) $(LIBRARY2)
