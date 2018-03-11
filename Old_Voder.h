@@ -16,18 +16,37 @@
 #include "BlitSaw.h"   // Sawtooth
 #include "RtAudio.h"   // Real Time Audio
 #include <iostream>    // I/O
+#include <vector>
+
+#define STK_SAMPLE_RATE 48000.0
+
+#define DEFAULT_FREQ 200
+#define DELTA_PITCH 0.05 
+#define DELTA_VOLUME 0.005
 
 using namespace stk;
+
+// Struct for Plosive Data
+struct PlosiveData {
+  std::vector<int> pre_keys;
+  std::vector<int> post_keys;
+  int t_switch;
+  int t_end;
+};
 
 // Container for Sound Generators
 struct SoundGens {
   Noise * hiss;         // hiss generator
   BlitSaw * buzz;       // buzz generator
   float pitch;          // frequency for buzz
-  float volume;         // percent voume multiplier
+  float volume;         // voume multiplier (%)
   int mode;             // hiss = 0, buzz = 1
-  int * button_states;  // buttons states
+  int active_plosive;   // currently active plosive
+  long timer;           // tick for plosives
+  int * prev_buttons;   // buttons states
+  int * curr_buttons; 
   FormSwep ** keys;     // Formant filters
+  std::vector<PlosiveData*> plos; // Plosive Data
 };
 
 // ===================================================
@@ -55,7 +74,6 @@ int tick( void * outBuff, void * inBuff, unsigned int nBuffFrames,
 // Functions:
 // ===================================================
 
-
 // Callback Function for Realtime Audio
 // Runs filters for sample depending on 
 int tick( void * outBuff, void * inBuff, unsigned int nBuffFrames,
@@ -63,62 +81,93 @@ int tick( void * outBuff, void * inBuff, unsigned int nBuffFrames,
   SoundGens * sg = (SoundGens *) dataPtr;
   
   register StkFloat * samples = (StkFloat *) outBuff;
-  StkFloat val, hval, bval, loudness;
+  StkFloat val, gen_val, loudness;
   
   sg->buzz->setFrequency( sg->pitch );
-	
-  for ( unsigned int i=0; i < nBuffFrames; ++i ) {
-    val = 0;
-    hval = sg->hiss->tick();
-    bval = sg->buzz->tick();
 
-    //TODO: if plosive active set mode and switch after timer runs out
-    for ( unsigned int j = 0; j < 10; ++j ) {
-      // Each filter
-      if ( sg->button_states[j] != 0 ) {
-	  loudness = sg->button_states[j] / 3.0;
-	  if ( sg->mode == 0 ) {
-	      val += sg->keys[j]->tick( hval ) * loudness;
-	  } 
-	  else {
-	      val += sg->keys[j]->tick( bval ) * loudness;
-	  }
+  bool silent = sg->curr_buttons[10] != 0 ||
+    sg->curr_buttons[11] != 0 || sg->curr_buttons[12] != 0;
+  int tmp_timer = sg->timer;
+  
+  for ( unsigned int n = 0; n < nBuffFrames; ++n ) {
+    val = 0;
+    if ( silent ) { val = 0; } // ===> Do nothing
+
+    // === Run Plosive ===
+    if ( !silent && sg->active_plosive != 0 ) {
+      int idx = sg->active_plosive;
+      long t_switch = sg->plos[idx]->t_switch;
+      long t_end = sg->plos[idx]->t_end;
+      if ( tmp_timer < t_switch ) { // Voiceless Phase
+	gen_val = sg->hiss->tick();
+	for ( unsigned k = 0; k < sg->plos[idx]->pre_keys.size(); k+=2 ) {
+	  loudness = sg->plos[idx]->pre_keys[k+1] / 10.0;
+	  int key_idx = sg->plos[idx]->pre_keys[k];
+	  val += sg->keys[key_idx]->tick( gen_val );// * loudness;
+	}
+	val *= 2.0;
+	++tmp_timer;
+	sg->timer = (n==0) ? sg->timer+1 : sg->timer;
+      } else if ( tmp_timer < t_switch + t_end ) { // Voiced Phase
+	gen_val = sg->buzz->tick();
+	for ( unsigned k = 0; k < sg->plos[idx]->post_keys.size(); k+=2 ) {
+	  loudness = sg->plos[idx]->post_keys[k+1] / 10.0;
+	  int key_idx = sg->plos[idx]->post_keys[k];
+	  val += sg->keys[key_idx]->tick( gen_val );// * loudness;
+	}
+	val *= 2.0;
+	++tmp_timer;
+	sg->timer = (n==0) ? sg->timer+1 : sg->timer;
+      } else { // Deactivate plosive
+	sg->active_plosive = 0;
+	sg->timer = 0;
       }
     }
-    if ( sg->button_states[10] != 0 ) {
-	val = 0;
-    } else if ( sg->button_states[11] != 0 ) {
-	val = 0;
-    } else if ( sg->button_states[12] != 0 ) {
-	val = 0;
+
+    // === Normal Functioning ===
+    if ( !silent && sg->active_plosive == 0 ) {
+      gen_val = ( sg->mode == 0 ) ? sg->hiss->tick() : sg->buzz->tick();
+      for ( int k = 0; k < 10; ++k ) {
+	if ( sg->curr_buttons[k] != 0 ) {
+	  loudness = sg->curr_buttons[k] / 10.0;
+	  val += sg->keys[k]->tick( gen_val ) * loudness;
+	}
+      }
     }
-    
-    // Output value of all active filters
+
+    // === Output results ===
     val *= (StkFloat) sg->volume;
     *samples++ = val;
     *samples++ = val;
-  }
+    
+  }  
 
   return 0;
 }
-
 
 void set_up( SoundGens & sg ) {
   // Make noise generators
   Noise * hiss = new Noise();
   BlitSaw * buzz = new BlitSaw();
 
-  // Set pitch and volume
-  sg.pitch = 200;
+  // Set mode, pitch, and volume
+  sg.mode = 0;
+  sg.pitch = DEFAULT_FREQ;
   sg.volume = 1.0;
+
+  // Set plosive variables
+  sg.active_plosive = 0;
+  sg.timer = 0;
 	
   // Setup generators
   buzz->setFrequency( sg.pitch );
   
   // Make button_states
   int * bs = new int[13];   // 10 Filters and 3 stop consonants
+  int * bs2 = new int[13];
   for ( unsigned int i = 0; i < 13; ++i ) {
     bs[i] = 0;
+    bs2[i] = 0;
   }
 
   // Make Formant Filters
@@ -128,33 +177,57 @@ void set_up( SoundGens & sg ) {
   }
 
   // Setup formant filters
-  filter[0]->setStates(  225, 0.99, 1.0 ); // 000 - 225
-  filter[1]->setStates(  450, 0.99, 1.0 ); // 255 - 450
-  filter[2]->setStates(  700, 0.99, 1.0 ); // 450 - 700
-  filter[3]->setStates( 1000, 0.99, 1.0 ); // 700 - 1000
-  filter[4]->setStates( 1400, 0.99, 1.0 ); // 1000 - 1400
-  filter[5]->setStates( 2000, 0.99, 1.0 ); // 1400 - 2000
-  filter[6]->setStates( 2700, 0.99, 1.0 ); // 2000 - 2700
-  filter[7]->setStates( 3800, 0.99, 1.0 ); // 2700 - 3800
-  filter[8]->setStates( 5400, 0.99, 1.0 ); // 3800 - 5400
-  filter[9]->setStates( 7500, 0.99, 1.0 ); // 5400 - 7500
+  //                   freq, radius, gain 
+  filter[0]->setStates(  225, 0.99, 1.0 ); // 225
+  filter[1]->setStates(  450, 0.99, 1.0 ); // 450
+  filter[2]->setStates(  700, 0.99, 1.0 ); // 700
+  filter[3]->setStates( 1000, 0.99, 1.0 ); // 1000
+  filter[4]->setStates( 1400, 0.99, 1.0 ); // 1400
+  filter[5]->setStates( 2000, 0.99, 1.0 ); // 2000
+  filter[6]->setStates( 2700, 0.99, 1.0 ); // 2700
+  filter[7]->setStates( 3800, 0.99, 1.0 ); // 3800
+  filter[8]->setStates( 5400, 0.99, 1.0 ); // 5400
+  filter[9]->setStates( 7500, 0.99, 1.0 ); // 7500
+
+  // Setup Plosives -- TODO: make each one (currently all P I think)
+  std::vector<PlosiveData*> plos_tmp;
+  for ( unsigned int p = 0; p < 6; ++p ) {
+    PlosiveData * tmp = new PlosiveData();
+    tmp->t_switch = 173;
+    tmp->t_end = 243;
+    // Stop Gap Phase -- none
+    tmp->pre_keys.push_back(3); tmp->pre_keys.push_back(10);
+    tmp->pre_keys.push_back(6); tmp->pre_keys.push_back(6);
+    tmp->pre_keys.push_back(3); tmp->pre_keys.push_back(4);
+    // Release Phase
+    // key                      volume (out of 10)
+    tmp->post_keys.push_back(3); tmp->post_keys.push_back(10);
+    tmp->post_keys.push_back(6); tmp->post_keys.push_back(6);
+    tmp->post_keys.push_back(3); tmp->post_keys.push_back(4);
+    plos_tmp.push_back( tmp );
+  }
 
   // Pass sound generators into container
   sg.hiss = hiss;
   sg.buzz = buzz;
-  sg.button_states = bs;
+  sg.curr_buttons = bs;
+  sg.prev_buttons = bs2;
   sg.keys = filter;
-  sg.mode = 0;
+  sg.plos = plos_tmp;
 }
 
 // Deallocate SoundGens struct
 void clean_up( SoundGens & sg ) {
-
   for ( unsigned int i = 0; i < 10; ++i ) {
     delete sg.keys[i]; 
   }
+
+  for ( unsigned int j = 0; j < sg.plos.size(); ++j ) {
+    delete sg.plos[j];
+  }
+  
   delete[] sg.keys;
-  delete[] sg.button_states;
+  delete[] sg.curr_buttons;
   delete sg.hiss;
   delete sg.buzz;
   
@@ -180,8 +253,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 void read_keys( gui::Window * win, SoundGens & base ) {
-    float dp = 0.05;
-    float dv = 0.005;
+    float dp = DELTA_PITCH;
+    float dv = DELTA_VOLUME;
     
     base.mode = (win->isKeyPressed( GLFW_KEY_SPACE ) ) ? 0 : 1;
     
@@ -203,39 +276,52 @@ void read_keys( gui::Window * win, SoundGens & base ) {
     // Reset
     if ( win->isKeyPressed( GLFW_KEY_0 ) ) {
 	base.volume = 1.0;
-	base.pitch = 200;
+	base.pitch = DEFAULT_FREQ;
     }
     
     // Left Hand
-    base.button_states[0] = trinary_button( win, GLFW_KEY_Z, GLFW_KEY_A, GLFW_KEY_Q );
-    base.button_states[1] = trinary_button( win, GLFW_KEY_X, GLFW_KEY_S, GLFW_KEY_W );
-    base.button_states[2] = trinary_button( win, GLFW_KEY_C, GLFW_KEY_D, GLFW_KEY_E );
-    base.button_states[3] = trinary_button( win, GLFW_KEY_V, GLFW_KEY_F, GLFW_KEY_R );
-    base.button_states[4] = trinary_button( win, GLFW_KEY_B, GLFW_KEY_G, GLFW_KEY_T );
+    base.curr_buttons[0] = trinary_button( win, GLFW_KEY_Z, GLFW_KEY_A, GLFW_KEY_Q );
+    base.curr_buttons[1] = trinary_button( win, GLFW_KEY_X, GLFW_KEY_S, GLFW_KEY_W );
+    base.curr_buttons[2] = trinary_button( win, GLFW_KEY_C, GLFW_KEY_D, GLFW_KEY_E );
+    base.curr_buttons[3] = trinary_button( win, GLFW_KEY_V, GLFW_KEY_F, GLFW_KEY_R );
+    base.curr_buttons[4] = trinary_button( win, GLFW_KEY_B, GLFW_KEY_G, GLFW_KEY_T );
     // Right Hand
-    base.button_states[5] = trinary_button( win, GLFW_KEY_N, GLFW_KEY_H, GLFW_KEY_Y );
-    base.button_states[6] = trinary_button( win, GLFW_KEY_M, GLFW_KEY_J, GLFW_KEY_U );
-    base.button_states[7] = trinary_button( win, GLFW_KEY_COMMA, GLFW_KEY_K, GLFW_KEY_I );
-    base.button_states[8] = trinary_button( win, GLFW_KEY_PERIOD, GLFW_KEY_L, GLFW_KEY_O );
-    base.button_states[9] = trinary_button( win, GLFW_KEY_SLASH, GLFW_KEY_SEMICOLON, GLFW_KEY_P );
+    base.curr_buttons[5] = trinary_button( win, GLFW_KEY_N, GLFW_KEY_H, GLFW_KEY_Y );
+    base.curr_buttons[6] = trinary_button( win, GLFW_KEY_M, GLFW_KEY_J, GLFW_KEY_U );
+    base.curr_buttons[7] = trinary_button( win, GLFW_KEY_COMMA, GLFW_KEY_K, GLFW_KEY_I );
+    base.curr_buttons[8] = trinary_button( win, GLFW_KEY_PERIOD, GLFW_KEY_L, GLFW_KEY_O );
+    base.curr_buttons[9] = trinary_button( win, GLFW_KEY_SLASH, GLFW_KEY_SEMICOLON, GLFW_KEY_P );
     // Plosives
-    base.button_states[10] = (win->isKeyPressed( GLFW_KEY_1 ) ) ? 1 : 0;
-    base.button_states[11] = (win->isKeyPressed( GLFW_KEY_2 ) ) ? 1 : 0;
-    base.button_states[12] = (win->isKeyPressed( GLFW_KEY_3 ) ) ? 1 : 0;
+    base.curr_buttons[10] = (win->isKeyPressed( GLFW_KEY_1 ) ) ? 1 : 0;
+    base.curr_buttons[11] = (win->isKeyPressed( GLFW_KEY_2 ) ) ? 1 : 0;
+    base.curr_buttons[12] = (win->isKeyPressed( GLFW_KEY_3 ) ) ? 1 : 0;
     // Notes:
     // when released start timer and switch timer
     // timer counts down to end
     // switch timer is how long to switch from hiss to buzz
-    
+    for ( unsigned int i = 0; i<13; ++i ){
+      if ( i >= 10 && base.prev_buttons[i] != 0 && base.curr_buttons[i] == 0 ) {
+	if ( base.mode == 0 ) { // voiceless
+	  base.active_plosive = i-10;
+	  base.timer = 0;
+	  std::cout << "Voiceless Plosive Activated: "<< base.active_plosive << std::endl;
+	} else { // voiced
+	  base.active_plosive = (i-10) + 3;
+	  base.timer = 0;
+	  std::cout << "Voiced Plosive Activated: "<< base.active_plosive << std::endl;
+	}
+      }
+      base.prev_buttons[i] = base.curr_buttons[i];
+    }
 }
 
 int trinary_button( gui::Window * win, int key1, int key2, int key3 ) {
     if ( win->isKeyPressed( key1 ) ) {
-	return 1;
-    } if ( win->isKeyPressed( key2 ) ){
-	return 2;
-    } if ( win->isKeyPressed( key3 ) ) {
 	return 3;
+    } if ( win->isKeyPressed( key2 ) ){
+	return 6;
+    } if ( win->isKeyPressed( key3 ) ) {
+	return 10;
     }
     return 0;
 }
