@@ -12,6 +12,7 @@ vpath %.o $(OBJECT_PATH)
 
 INCLUDE = src/
 INCLUDE2 = src/voder/include
+INCLUDE3 = ../src/voder/include
 ifeq ($(strip $(INCLUDE)), )
 	INCLUDE = include
 endif
@@ -26,7 +27,7 @@ DEFS     = -DHAVE_GETTIMEOFDAY -D__LINUX_ALSA__
 DEFS    += -D__LITTLE_ENDIAN__
 # STK Flags
 CFLAGS   = -O3 -Wall
-CFLAGS  += -I$(INCLUDE) -I$(INCLUDE2)
+CFLAGS  += -I$(INCLUDE) -I$(INCLUDE2) -I$(INCLUDE3)
 # Featherfall Flags
 FF_CFLAGS = -std=c++11
 # Basic Voder example libraries
@@ -39,7 +40,7 @@ ifeq ($(REALTIME),yes)
 
 endif
 
-# STK files
+# === STK files ===
 %.o : $(SRC_PATH)/voder/%.cpp $(OBJECT_PATH)/.placeholder
 	$(CC) $(CFLAGS) $(DEFS) -c $(<) -o $(OBJECT_PATH)/$@
 
@@ -51,7 +52,12 @@ endif
 
 # Math files
 %.o : $(SRC_PATH)/math/%.cpp $(OBJECT_PATH)/.placeholder
-	$(CC) $(CLFAGS) $(FF_CFLAGS) -c $(<) -o $(OBJECT_PATH)/$@
+	$(CC) $(CFLAGS) $(FF_CFLAGS) -c $(<) -o $(OBJECT_PATH)/$@
+
+# === Text-to-Speech files ===
+%.o : tts/%.cpp $(OBJECT_PATH)/.placeholder
+	$(CC) $(CFLAGS) $(FF_CFLAGS) $(DEFS) -c $(<) -o $(OBJECT_PATH)/$@
+
 
 all : $(PROGRAMS)
 
@@ -69,6 +75,8 @@ distclean: clean
 	$(RM) Makefile
 
 debug:	voder_fall_debug
+
+tts: voder_tts
 
 ### === BASIC VODER EXAMPLE PROGRAMS ===
 
@@ -88,7 +96,7 @@ voder_key2: Voder_kb2.cpp Old_Window.o $(VODER_OBJS)
 
 ### === Featherfall Voder Program ===
 
-FF_OBJS  = IBO.o VAO.o VBO.o mat4.o vec2.o vec3.o vec4.o
+FF_OBJS = IBO.o VAO.o VBO.o mat4.o vec2.o vec3.o vec4.o
 
 BUFFER_FILES = $(OBJECT_PATH)/IBO.o $(OBJECT_PATH)/VAO.o $(OBJECT_PATH)/VBO.o
 MATH_FILES = $(OBJECT_PATH)/mat4.o $(OBJECT_PATH)/vec2.o $(OBJECT_PATH)/vec3.o $(OBJECT_PATH)/vec4.o
@@ -114,3 +122,13 @@ FF_SOURCES_DEBUG = $(FF_SOURCES) $(BUFFER_FILES_DEBUG) $(MATH_FILES_DEBUG)
 
 voder_fall_debug: $(FF_SOURCES_DEBUG) $(VODER_OBJS)
 	$(CC) $(LDFLAGS) $(CFLAGS) $(FF_CFLAGS) $(DEFS) -g -o VoderEngineDebug.out $(FF_SOURCES_DEBUG) $(VODER_FILES) $(LIBRARY2)
+
+
+## ======  Voder Text-to-Speech ===============
+
+TTS_OBJS = parser.o player.o
+
+TTS_FILES = $(OBJECT_PATH)/parser.o $(OBJECT_PATH)/player.o
+
+voder_tts: tts/VoderTTS_main.cpp $(TTS_OBJS) $(VODER_OBJS)
+	$(CC) $(LDFLAGS) $(CFLAGS) $(FF_CFLAGS) $(DEFS) -g -o vodertts.out tts/VoderTTS_main.cpp $(VODER_FILES) $(TTS_FILES) $(LIBRARY1)

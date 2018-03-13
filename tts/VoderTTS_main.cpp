@@ -6,6 +6,8 @@
  *
  *=========================================*/
 
+#include "parser.h"
+#include "player.h"
 #include <iostream>
 #include <string>
 
@@ -31,11 +33,11 @@ int main( int argc, char ** argv ) {
   } else if ( std::string(argv[1]) == std::string("-read") && argc >= 3 ) {
     std::string in_file( argv[2] );
     std::string out_file = (argc >= 4) ? argv[3] : "";
-    //read( in_file, out_file );
+    read( in_file, out_file );
   } else if ( std::string(argv[1]) == std::string("-play") && argc >= 3 ) {
     std::string in_file( argv[2] );
     std::string out_file = (argc >= 4) ? argv[3] : "";
-    //play( in_file, out_file );
+    play( in_file, out_file );
   } else {
     std::cerr << "voderTTS: error: unrecognized command" << std::endl;
     help();
