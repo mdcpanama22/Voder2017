@@ -28,7 +28,7 @@ DEFS    += -D__LITTLE_ENDIAN__
 CFLAGS   = -O3 -Wall
 CFLAGS  += -I$(INCLUDE) -I$(INCLUDE2)
 # Featherfall Flags
-FF_CFLAGS = -std=c++11 #-fpermissive
+FF_CFLAGS = -std=c++11
 # Basic Voder example libraries
 LIBRARY1  = -lpthread -lasound -lm
 # Full Voder libraries
@@ -102,15 +102,15 @@ SRC_FILES = src/main.cpp
 
 FF_SOURCES = $(GRAPHICS_FILES) $(SRC_FILES)
 
-
 voder_fall: $(FF_SOURCES) $(FF_OBJS) $(VODER_OBJS)
 	$(CC) $(LDFLAGS) $(CFLAGS) $(FF_CFLAGS) $(DEFS) -o VoderEngine.out $(FF_SOURCES) $(VODER_FILES) $(FF_FILES) $(LIBRARY2)
 
+## === Featherfall Voder Debug Compilation ===
 
-BUFFER_FILES_DEBUG = $(OBJECT_PATH)/IBO.o $(OBJECT_PATH)/VAO.o $(OBJECT_PATH)/VBO.o
-MATH_FILES_DEBUG = $(OBJECT_PATH)/mat4.o $(OBJECT_PATH)/vec2.o $(OBJECT_PATH)/vec3.o $(OBJECT_PATH)/vec4.o
+BUFFER_FILES_DEBUG = src/buffers/IBO.cpp src/buffers/VAO.cpp src/buffers/VBO.cpp
+MATH_FILES_DEBUG = src/math/mat4.cpp src/math/vec2.cpp src/math/vec3.cpp src/math/vec4.cpp
 
-FF_FILES_DEBUG = $(BUFFER_FILES_DEBUG) $(MATH_FILES_DEBUG)
+FF_SOURCES_DEBUG = $(FF_SOURCES) $(BUFFER_FILES_DEBUG) $(MATH_FILES_DEBUG)
 
-voder_fall_debug: $(FF_SOURCES) $(FF_FILES_DEBUG) $(VODER_OBJS)
-	$(CC) $(LDFLAGS) $(CFLAGS) $(FF_CFLAGS) $(DEFS) -g -o VoderEngineDebug.out $(FF_SOURCES) $(VODER_FILES) $(FF_FILES_DEBUG) $(LIBRARY2)
+voder_fall_debug: $(FF_SOURCES_DEBUG) $(VODER_OBJS)
+	$(CC) $(LDFLAGS) $(CFLAGS) $(FF_CFLAGS) $(DEFS) -g -o VoderEngineDebug.out $(FF_SOURCES_DEBUG) $(VODER_FILES) $(LIBRARY2)
