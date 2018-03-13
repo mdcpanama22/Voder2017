@@ -26,13 +26,13 @@ int main( int argc, char ** argv ) {
     return 0;
   }
 
-  if ( argv[1] == "-help" || argc < 3) {
+  if ( std::string(argv[1]) == std::string("-help") ) {
     help();
-  } else if ( argv[1] == "-read" ) {
+  } else if ( std::string(argv[1]) == std::string("-read") && argc >= 3 ) {
     std::string in_file( argv[2] );
     std::string out_file = (argc >= 4) ? argv[3] : "";
     //read( in_file, out_file );
-  } else if ( argv[1] == "-play" ) {
+  } else if ( std::string(argv[1]) == std::string("-play") && argc >= 3 ) {
     std::string in_file( argv[2] );
     std::string out_file = (argc >= 4) ? argv[3] : "";
     //play( in_file, out_file );
