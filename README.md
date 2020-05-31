@@ -83,7 +83,7 @@ make
 
 # Who
 
-If you have any questions contact us: gurnys@rpi.edu
+If you have any questions contact us: sinclairg@outlook.com
 
 ## License
 
